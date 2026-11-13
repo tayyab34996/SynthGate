@@ -1,0 +1,45 @@
+name: normal_operations
+target_delay_proportion: 0.55
+target_tolerance: 0.03
+requested_rows: 1000
+mutable_columns:
+  - late_delivery_risk
+  - delivery_status
+stable_columns:
+  - payment_type
+  - category
+  - customer_segment
+  - department
+  - market
+  - order_region
+  - order_status
+  - shipping_mode
+  - days_for_shipping
+  - days_for_shipment_scheduled
+  - discount_rate
+  - quantity
+  - product_price
+  - sales
+  - order_item_total
+  - benefit_per_order
+  - profit_ratio
+  - order_to_ship_days
+stable_relationships:
+  - [quantity, product_price]
+  - [shipping_mode, days_for_shipment_scheduled]
+  - [customer_segment, market]
+mandatory_rules:
+  - no_nulls
+  - valid_delay_status
+  - valid_shipping_days
+  - valid_discount_rate
+  - positive_quantity
+  - positive_values
+  - valid_order_shipping_interval
+quality_thresholds:
+  max_scenario_error: 0.03
+  minimum_stability_score: 0.6
+  maximum_exact_copy_rate: 0.05
+sampling:
+  max_attempts: 10
+  batch_size: 1000
