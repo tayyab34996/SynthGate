@@ -1,0 +1,10 @@
+source:
+  name: DataCo SMART SUPPLY CHAIN FOR BIG DATA ANALYSIS
+  url: https://data.mendeley.com/datasets/8gx2fvg2k6/5
+  doi: 10.17632/8gx2fvg2k6.5
+  input: data/raw/DataCo_sample.csv
+  encoding: latin1
+
+split:
+  holdout_fraction: 0.2
+  seed: 42

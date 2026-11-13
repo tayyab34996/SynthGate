@@ -1,0 +1,38 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Secrets and local configuration
+.env
+.env.*
+!.env.example
+.dvc/config.local
+
+# Local data and generated artifacts (track data with DVC)
+data/**
+!data/**/
+!data/**/.gitkeep
+!data/**/*.dvc
+!data/**/.gitignore
+models/**
+!models/**/
+!models/**/.gitkeep
+artifacts/**
+!artifacts/**/
+!artifacts/**/.gitkeep
+mlruns/
+mlartifacts/
+
+# Editors and operating systems
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

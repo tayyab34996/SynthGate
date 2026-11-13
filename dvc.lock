@@ -1,0 +1,34 @@
+schema: '2.0'
+stages:
+  prepare_data:
+    cmd: uv run python -m synthgate.data --config configs/data.yaml
+    deps:
+    - path: configs/data.yaml
+      hash: md5
+      md5: 9e63eedd86599142bb8b15ea59cb36df
+      size: 256
+    - path: data/raw/DataCo_sample.csv
+      hash: md5
+      md5: bb3c9e451cf1455b4706bf66b9d9edc5
+      size: 9688752
+    - path: src/synthgate/data.py
+      hash: md5
+      md5: c546d6e17faa518441321ea4b4655abb
+      size: 8013
+    outs:
+    - path: data/processed/holdout.csv
+      hash: md5
+      md5: 828d00718801018f7dbca2561d923dfa
+      size: 647322
+    - path: data/processed/profile.json
+      hash: md5
+      md5: 1d89a3dde48b75d83ffd53136ef1358f
+      size: 1242
+    - path: data/processed/shipments.csv
+      hash: md5
+      md5: ab999535e71748aa23f6d15171bde141
+      size: 3229276
+    - path: data/processed/train.csv
+      hash: md5
+      md5: 909f79145211a77046eddfdd3a40fd8e
+      size: 2582243

@@ -1,0 +1,15 @@
+vars:
+  - configs/data.yaml
+
+stages:
+  prepare_data:
+    cmd: uv run python -m synthgate.data --config configs/data.yaml
+    deps:
+      - ${source.input}
+      - src/synthgate/data.py
+      - configs/data.yaml
+    outs:
+      - data/processed/shipments.csv
+      - data/processed/train.csv
+      - data/processed/holdout.csv
+      - data/processed/profile.json
