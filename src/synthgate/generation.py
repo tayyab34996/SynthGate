@@ -29,6 +29,8 @@ CONTRACT_DIRECTORY: Final = Path("configs/contracts")
 class SynthesizerProtocol(Protocol):
     def fit(self, data: dict[str, pd.DataFrame]) -> None: ...
 
+    def _set_random_state(self, random_state: int) -> None: ...
+
     def sample(self, num_rows: int) -> dict[str, pd.DataFrame]: ...
 
     def sample_from_conditions(
@@ -186,6 +188,12 @@ def _log_pyfunc_model(synthesizer: SynthesizerProtocol) -> str:
     return model_info.model_uri
 
 
+# This function restores the unconsumed sampling state saved after model fitting.
+def _load_synthesizer(model_path: Path) -> SynthesizerProtocol:
+    with model_path.open("rb") as stream:
+        return pickle.load(stream)
+
+
 # This function trains one generator, logs each run remotely, and writes DVC outputs.
 def run_generation(model_type: str, config_path: Path = Path("configs/models.yaml")) -> None:
     import mlflow
@@ -230,7 +238,15 @@ def run_generation(model_type: str, config_path: Path = Path("configs/models.yam
         mlflow.log_artifact(str(metadata_path), artifact_path="checkpoint")
         model_uri = _log_pyfunc_model(synthesizer)
         if bool(model_config["register"]):
-            register_staging_model(model_uri, str(model_config["registry_name"]))
+            registry_name = str(model_config["registry_name"])
+            version = register_staging_model(model_uri, registry_name)
+            mlflow.log_params(
+                {
+                    "registered_model_name": registry_name,
+                    "registered_model_version": version,
+                    "registered_model_stage": "Staging",
+                }
+            )
 
     output_dir = Path("data/generated") / model_type
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -241,9 +257,11 @@ def run_generation(model_type: str, config_path: Path = Path("configs/models.yam
     }
     for contract_path in sorted(CONTRACT_DIRECTORY.glob("*.yaml")):
         contract = load_contract(contract_path)
+        scenario_synthesizer = _load_synthesizer(model_path)
         set_random_seed(seed)
+        scenario_synthesizer._set_random_state(seed)
         generation_started = time.perf_counter()
-        generated, report = generate_scenario(synthesizer, contract, table_name)
+        generated, report = generate_scenario(scenario_synthesizer, contract, table_name)
         report["model_type"] = model_type
         report["contract"] = contract.name
         report["contract_sha256"] = contract.sha256
