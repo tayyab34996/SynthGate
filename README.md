@@ -22,7 +22,7 @@ Copy-Item .env.example .env
 
 Keep `.env` local. Create a DagsHub access token with repository read/write access, then populate the local `.env` credentials. Never commit tokens, raw datasets, generated datasets, or model weights.
 
-Download the DataCo source file from [Mendeley Data, version 5](https://data.mendeley.com/datasets/8gx2fvg2k6/5) and place `DataCoSupplyChainDataset.csv` under `data/raw/`. Keep the original file local: it includes customer names, email addresses, street details, and password fields. Run `uv run python 1.py` to create the deterministic sample expected by the pipeline at `data/raw/DataCo_sample.csv`. The preparation stage drops direct identifiers, IDs, exact dates, and fine-grained location fields before producing the DVC-managed feature dataset.
+Download the DataCo source file from [Mendeley Data, version 5](https://data.mendeley.net/datasets/8gx2fvg2k6/5) and place `DataCoSupplyChainDataset.csv` under `data/raw/`. Keep the original file local: it includes customer names, email addresses, street details, and password fields. Run `uv run python 1.py` to create a deterministic 5% sample at `data/raw/DataCo_sample.csv`; rerunning the script replaces any existing sample with one generated from the downloaded source. The preparation stage drops direct identifiers, IDs, exact dates, and fine-grained location fields before producing the DVC-managed feature dataset.
 
 ### DVC remote
 
@@ -34,11 +34,11 @@ dvc remote modify --local storage user <your-dagshub-username>
 dvc remote modify --local storage password <your-dagshub-token>
 ```
 
-Verify access with `dvc remote list` and `dvc status`. DVC data and model outputs will be stored remotely; Git should contain the corresponding `.dvc` pointer files, not the data or weights.
+Verify access with `dvc remote list` and `dvc status`. DVC data and model outputs will be stored remotely; Git tracks pipeline output hashes in `dvc.lock`, not the datasets or model weights.
 
 ### MLflow tracking
 
-The `.env.example` template provides the DagsHub MLflow tracking URI. Set `MLFLOW_TRACKING_USERNAME` and `MLFLOW_TRACKING_PASSWORD` to your DagsHub username and access token in `.env`. Pipeline code will load these settings and log runs to the remote tracking server; local MLflow tracking is not the project default.
+The `.env.example` template provides the DagsHub MLflow tracking URI. Set `MLFLOW_TRACKING_USERNAME` and `MLFLOW_TRACKING_PASSWORD` to your DagsHub username and access token in `.env`. Pipeline code requires these settings and logs every training and generation run remotely; it deliberately has no local tracking fallback. The pipeline registers the Gaussian Copula checkpoint and moves its version to Staging.
 
 ## Running
 
@@ -48,13 +48,22 @@ Prepare, validate, and split the dataset with the first DVC stage:
 uv run dvc repro prepare_data
 ```
 
-This writes a de-identified feature table, stratified train/holdout splits, and a data profile under `data/processed/`. Once the generator and evaluation stages are implemented, run the full pipeline with:
+This writes a de-identified feature table, stratified train/holdout splits, and a data profile under `data/processed/`. After configuring remote MLflow credentials, train either generator with:
+
+```powershell
+uv run dvc repro train_gaussian_copula
+uv run dvc repro train_ctgan
+```
+
+Each generator trains once, conditionally samples both scenario contracts, applies bounded rejection sampling, and logs training and generation artifacts/metrics to remote MLflow. Evaluate all four model-contract outputs and reproduce every stage with:
 
 ```powershell
 uv run dvc repro
 ```
 
-Run `uv run dvc push` to upload DVC-managed outputs to the configured DagsHub remote and `uv run dvc pull` after cloning to restore them. DVC cannot reconstruct its input if the source CSV has not been downloaded locally. `uv.lock` records the resolved dependency versions; use `uv sync --locked` to reproduce them.
+Evaluation reports contain scenario-target error, per-rule violations, SDMetrics scores for stable columns and declared stable relationships, exact-copy rates, nearest-neighbour distances, and training/generation time. Similarity values are risk indicators, not privacy guarantees.
+
+Run `uv run dvc push` to upload DVC-managed outputs to the configured DagsHub remote and `uv run dvc pull` after cloning to restore them. DVC cannot reproduce the data preparation stage if the source CSV has not been downloaded locally. `uv.lock` records the resolved dependency versions; use `uv sync --locked` to reproduce them.
 
 ## Development
 
@@ -74,10 +83,15 @@ dvc.yaml              Named, reproducible data and model pipeline stages
 data/
   raw/                Source CSV (local only; contains identifying source fields)
   processed/          De-identified, validated/split data (DVC-managed)
-  evaluation/         Labeled evaluation data (local only; DVC-managed)
+  generated/          Candidate datasets and sampling reports (DVC-managed)
 models/               Generated model weights (local only; DVC-managed)
-artifacts/            Reports and generated datasets (local only; DVC-managed)
+artifacts/evaluation/ Evaluation reports (local only; DVC-managed)
 src/synthgate/        Pipeline package
+  data.py             Data preparation and schema validation
+  contracts.py        Contract loading and business-rule checks
+  generation.py       Gaussian Copula and CTGAN training/sampling
+  evaluation.py       SDMetrics, similarity, and operational evaluation
+  tracking.py         Remote MLflow setup and registration
 tests/                Unit and pipeline tests
 .dvc/config           Shared DagsHub DVC remote URL (no credentials)
 .env.example          Environment variable template (no credentials)

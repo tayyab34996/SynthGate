@@ -53,3 +53,28 @@ stages:
       - data/generated/ctgan
       - models/ctgan.pkl
       - models/ctgan_metadata.json
+
+  evaluate:
+    cmd: uv run python -m synthgate.evaluation
+    deps:
+      - data/processed/train.csv
+      - data/processed/holdout.csv
+      - data/generated/gaussian_copula/normal_operations.csv
+      - data/generated/gaussian_copula/normal_operations.json
+      - data/generated/gaussian_copula/delivery_disruption.csv
+      - data/generated/gaussian_copula/delivery_disruption.json
+      - data/generated/ctgan/normal_operations.csv
+      - data/generated/ctgan/normal_operations.json
+      - data/generated/ctgan/delivery_disruption.csv
+      - data/generated/ctgan/delivery_disruption.json
+      - configs/models.yaml
+      - configs/contracts/normal_operations.yaml
+      - configs/contracts/delivery_disruption.yaml
+      - src/synthgate/contracts.py
+      - src/synthgate/data.py
+      - src/synthgate/evaluation.py
+      - src/synthgate/tracking.py
+      - pyproject.toml
+      - uv.lock
+    outs:
+      - artifacts/evaluation
