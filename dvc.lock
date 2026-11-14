@@ -101,3 +101,64 @@ stages:
       hash: md5
       md5: 3b758f5e7c1846c809148824221f5a16
       size: 10295
+  train_ctgan:
+    cmd: uv run python -m synthgate.generation --model ctgan
+    deps:
+    - path: configs/contracts/delivery_disruption.yaml
+      hash: md5
+      md5: a2250b7f9f397184c18925ac9313a803
+      size: 1013
+    - path: configs/contracts/normal_operations.yaml
+      hash: md5
+      md5: 546746101041c680bfb829abf1f38bf1
+      size: 1011
+    - path: configs/models.yaml
+      hash: md5
+      md5: 2dc7376fd587b597ebf71964cdd46014
+      size: 361
+    - path: data/processed/profile.json
+      hash: md5
+      md5: 1d89a3dde48b75d83ffd53136ef1358f
+      size: 1242
+    - path: data/processed/train.csv
+      hash: md5
+      md5: 909f79145211a77046eddfdd3a40fd8e
+      size: 2582243
+    - path: pyproject.toml
+      hash: md5
+      md5: 23cc1f2024ffc2ec48c876b4b813ee97
+      size: 893
+    - path: src/synthgate/contracts.py
+      hash: md5
+      md5: dd79c1e33dda844a5ce78b1dd6d4148e
+      size: 6880
+    - path: src/synthgate/data.py
+      hash: md5
+      md5: c546d6e17faa518441321ea4b4655abb
+      size: 8013
+    - path: src/synthgate/generation.py
+      hash: md5
+      md5: 003d913f08781e3e105b5897bd80e285
+      size: 14234
+    - path: src/synthgate/tracking.py
+      hash: md5
+      md5: b244e539a47025dc1f2847a7e9c78359
+      size: 1497
+    - path: uv.lock
+      hash: md5
+      md5: 4db12d2991164d6da7731c8e03790417
+      size: 1001667
+    outs:
+    - path: data/generated/ctgan
+      hash: md5
+      md5: 88335b204517bba4dd5181cfb599e6e4.dir
+      size: 381180
+      nfiles: 4
+    - path: models/ctgan.pkl
+      hash: md5
+      md5: 98a007f058000ee33b7fbe3cc83135e4
+      size: 2618823
+    - path: models/ctgan_metadata.json
+      hash: md5
+      md5: 3b758f5e7c1846c809148824221f5a16
+      size: 10295
