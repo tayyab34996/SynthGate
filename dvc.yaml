@@ -8,8 +8,48 @@ stages:
       - ${source.input}
       - src/synthgate/data.py
       - configs/data.yaml
+      - pyproject.toml
+      - uv.lock
     outs:
       - data/processed/shipments.csv
       - data/processed/train.csv
       - data/processed/holdout.csv
       - data/processed/profile.json
+
+  train_gaussian_copula:
+    cmd: uv run python -m synthgate.generation --model gaussian_copula
+    deps:
+      - data/processed/train.csv
+      - data/processed/profile.json
+      - configs/models.yaml
+      - configs/contracts/normal_operations.yaml
+      - configs/contracts/delivery_disruption.yaml
+      - src/synthgate/contracts.py
+      - src/synthgate/generation.py
+      - src/synthgate/tracking.py
+      - src/synthgate/data.py
+      - pyproject.toml
+      - uv.lock
+    outs:
+      - data/generated/gaussian_copula
+      - models/gaussian_copula.pkl
+      - models/gaussian_copula_metadata.json
+
+  train_ctgan:
+    cmd: uv run python -m synthgate.generation --model ctgan
+    deps:
+      - data/processed/train.csv
+      - data/processed/profile.json
+      - configs/models.yaml
+      - configs/contracts/normal_operations.yaml
+      - configs/contracts/delivery_disruption.yaml
+      - src/synthgate/contracts.py
+      - src/synthgate/generation.py
+      - src/synthgate/tracking.py
+      - src/synthgate/data.py
+      - pyproject.toml
+      - uv.lock
+    outs:
+      - data/generated/ctgan
+      - models/ctgan.pkl
+      - models/ctgan_metadata.json

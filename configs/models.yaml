@@ -1,0 +1,16 @@
+experiment_name: SynthGate
+table_name: shipments
+seed: 42
+models:
+  gaussian_copula:
+    registry_name: SynthGate-GaussianCopula
+    register: true
+  ctgan:
+    registry_name: SynthGate-CTGAN
+    register: false
+    epochs: 10
+    embedding_dim: 64
+    generator_dim: [128, 128]
+    discriminator_dim: [128, 128]
+    batch_size: 100
+    pac: 10

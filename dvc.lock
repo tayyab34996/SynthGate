@@ -11,10 +11,18 @@ stages:
       hash: md5
       md5: bb3c9e451cf1455b4706bf66b9d9edc5
       size: 9688752
+    - path: pyproject.toml
+      hash: md5
+      md5: 23cc1f2024ffc2ec48c876b4b813ee97
+      size: 893
     - path: src/synthgate/data.py
       hash: md5
       md5: c546d6e17faa518441321ea4b4655abb
       size: 8013
+    - path: uv.lock
+      hash: md5
+      md5: 4db12d2991164d6da7731c8e03790417
+      size: 1001667
     outs:
     - path: data/processed/holdout.csv
       hash: md5
