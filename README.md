@@ -22,7 +22,7 @@ Copy-Item .env.example .env
 
 Keep `.env` local. Create a DagsHub access token with repository read/write access, then populate the local `.env` credentials. Never commit tokens, raw datasets, generated datasets, or model weights.
 
-Download the DataCo source file from [Mendeley Data, version 5](https://data.mendeley.net/datasets/8gx2fvg2k6/5) and place `DataCoSupplyChainDataset.csv` under `data/raw/`. Keep the original file local: it includes customer names, email addresses, street details, and password fields. Run `uv run python 1.py` to create a deterministic 5% sample at `data/raw/DataCo_sample.csv`; rerunning the script replaces any existing sample with one generated from the downloaded source. The preparation stage drops direct identifiers, IDs, exact dates, and fine-grained location fields before producing the DVC-managed feature dataset.
+Download the DataCo source file from [Mendeley Data, version 5](https://data.mendeley.net/datasets/8gx2fvg2k6/5) and place `DataCoSupplyChainDataset.csv` under `data/raw/`. Keep the original file local: it includes customer names, email addresses, street details, and password fields. Run `uv run python 1.py` to create a deterministic 10% sample at `data/raw/DataCo_sample.csv`; rerunning the script replaces any existing sample with one generated from the downloaded source. The preparation stage drops direct identifiers, IDs, exact dates, and fine-grained location fields before producing the DVC-managed feature dataset.
 
 ### DVC remote
 
