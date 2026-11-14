@@ -74,6 +74,38 @@ def test_generate_scenario_returns_requested_delay_rate() -> None:
     assert report["scenario_target_error"] == 0
 
 
+# This test keeps retry batches large enough to replace rejected final rows.
+def test_generate_scenario_oversamples_to_fill_rejected_rows() -> None:
+    contract = replace(
+        load_contract(Path("configs/contracts/delivery_disruption.yaml")),
+        requested_rows=20,
+        batch_size=10,
+    )
+
+    class OneInvalidNonLateRow(FakeSynthesizer):
+        def __init__(self) -> None:
+            self.non_late_batch_sizes: list[int] = []
+
+        def sample_from_conditions(
+            self, conditions: list[Condition], **kwargs: object
+        ) -> dict[str, pd.DataFrame]:
+            condition = conditions[0]
+            late_flag = condition.column_values["late_delivery_risk"]
+            result = super().sample_from_conditions(conditions, **kwargs)["shipments"]
+            if late_flag == 0:
+                self.non_late_batch_sizes.append(condition.num_rows)
+                if len(self.non_late_batch_sizes) == 1:
+                    result.loc[result.index[0], "quantity"] = 0
+            return {"shipments": result}
+
+    synthesizer = OneInvalidNonLateRow()
+    generated, report = generate_scenario(synthesizer, contract)
+
+    assert len(generated) == 20
+    assert report["status"] == "success"
+    assert synthesizer.non_late_batch_sizes == [10]
+
+
 # This test fails clearly when the generator cannot satisfy mandatory rules.
 def test_generate_scenario_reports_bounded_sampling_failure() -> None:
     contract = replace(

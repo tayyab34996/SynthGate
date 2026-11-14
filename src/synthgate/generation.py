@@ -99,7 +99,7 @@ def generate_scenario(
         while class_accepted < quota and class_attempts[str(late_flag)] < contract.max_attempts:
             class_attempts[str(late_flag)] += 1
             needed = quota - class_accepted
-            batch_rows = min(needed, contract.batch_size)
+            batch_rows = contract.batch_size
             conditions = {"late_delivery_risk": late_flag}
             if late_flag == 1:
                 conditions["delivery_status"] = "Late delivery"
