@@ -274,6 +274,7 @@ def run_generation(model_type: str, config_path: Path = Path("configs/models.yam
                     "achieved_delay_proportion": float(report["achieved_delay_proportion"]),
                     "scenario_target_error": float(report["scenario_target_error"]),
                     "generation_seconds": float(report["generation_seconds"]),
+                    "training_seconds": float(report["training_seconds"]),
                     "acceptance_rate": float(report["acceptance_rate"]),
                     "attempted_rows": float(report["attempted_rows"]),
                 }
