@@ -61,7 +61,7 @@ Each generator trains once, conditionally samples both scenario contracts, appli
 uv run dvc repro
 ```
 
-Evaluation reports contain scenario-target error, per-rule violations, SDMetrics scores for stable columns and declared stable relationships, exact-copy rates, nearest-neighbour distances, and training/generation time. Similarity values are risk indicators, not privacy guarantees.
+Evaluation reports contain scenario-target error, per-rule violations, SDMetrics scores for stable columns and declared stable relationships, exact-copy rates, and nearest-neighbour distances. Variable training, generation, and evaluation times are logged to MLflow, not stored in DVC-tracked reports, so identical inputs can reproduce the same report contents. Similarity values are risk indicators, not privacy guarantees.
 
 Run `uv run dvc push` to upload DVC-managed outputs to the configured DagsHub remote and `uv run dvc pull` after cloning to restore them. DVC cannot reproduce the data preparation stage if the source CSV has not been downloaded locally. `uv.lock` records the resolved dependency versions; use `uv sync --locked` to reproduce them.
 

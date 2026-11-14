@@ -10,6 +10,7 @@ from sdv.sampling import Condition
 from synthgate.contracts import load_contract
 from synthgate.data import SAFE_COLUMNS
 from synthgate.generation import (
+    _build_scenario_report,
     _load_synthesizer,
     build_synthesizer,
     generate_scenario,
@@ -98,6 +99,35 @@ def test_generate_scenario_reports_bounded_sampling_failure() -> None:
     assert "Could not generate" in report["reason"]
 
 
+# This test keeps run-specific timing and MLflow identifiers out of DVC reports.
+def test_scenario_report_contains_only_reproducible_metadata() -> None:
+    contract = load_contract(Path("configs/contracts/normal_operations.yaml"))
+    sampling_report = {
+        "status": "success",
+        "reason": None,
+        "requested_rows": 1000,
+        "generated_rows": 1000,
+        "target_delay_proportion": 0.55,
+        "achieved_delay_proportion": 0.55,
+        "scenario_target_error": 0.0,
+        "attempts_by_class": {"0": 450, "1": 550},
+        "attempted_rows": 1000,
+        "accepted_rows": 1000,
+        "acceptance_rate": 1.0,
+        "training_seconds": 12.4,
+        "generation_seconds": 2.1,
+        "run_id": "mlflow-run-id",
+    }
+
+    report = _build_scenario_report(sampling_report, "gaussian_copula", contract, 42, "hash")
+
+    assert report["status"] == "success"
+    assert report["seed"] == 42
+    assert "training_seconds" not in report
+    assert "generation_seconds" not in report
+    assert "run_id" not in report
+
+
 # This test verifies that each scenario starts from the saved model's initial RNG state.
 def test_scenario_sampling_reloads_a_reproducible_model(tmp_path: Path) -> None:
     rng = np.random.default_rng(42)
@@ -158,6 +188,9 @@ def test_scenario_sampling_reloads_a_reproducible_model(tmp_path: Path) -> None:
 
 # This test prevents local MLflow fallbacks when remote credentials are absent.
 def test_configure_tracking_requires_remote_credentials(monkeypatch: pytest.MonkeyPatch) -> None:
+    import dotenv
+
+    monkeypatch.setattr(dotenv, "load_dotenv", lambda: None)
     for key in ("MLFLOW_TRACKING_URI", "MLFLOW_TRACKING_USERNAME", "MLFLOW_TRACKING_PASSWORD"):
         monkeypatch.delenv(key, raising=False)
 

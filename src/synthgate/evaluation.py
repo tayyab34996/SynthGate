@@ -149,8 +149,6 @@ def evaluate_candidate(
         "stability": stability,
         "similarity_risk_indicators": similarity,
         "operational": {
-            "training_seconds": sampling_report["training_seconds"],
-            "generation_seconds": sampling_report["generation_seconds"],
             "sampling_attempted_rows": sampling_report["attempted_rows"],
             "sampling_acceptance_rate": sampling_report["acceptance_rate"],
         },
@@ -184,7 +182,7 @@ def run_evaluation() -> None:
             )
             evaluation_started = time.perf_counter()
             result = evaluate_candidate(training, holdout, candidate, contract, sampling_report)
-            result["evaluation_seconds"] = time.perf_counter() - evaluation_started
+            evaluation_seconds = time.perf_counter() - evaluation_started
             result_path = output_dir / f"{model_type}_{contract.name}.json"
             result_path.write_text(json.dumps(result, indent=2), encoding="utf-8")
 
@@ -199,9 +197,7 @@ def run_evaluation() -> None:
                 "holdout_exact_copy_rate": similarity["holdout_exact_copy_rate"],
                 "nearest_training_distance_mean": similarity["nearest_training_distance_mean"],
                 "nearest_holdout_distance_mean": similarity["nearest_holdout_distance_mean"],
-                "training_seconds": float(result["operational"]["training_seconds"]),
-                "generation_seconds": float(result["operational"]["generation_seconds"]),
-                "evaluation_seconds": float(result["evaluation_seconds"]),
+                "evaluation_seconds": evaluation_seconds,
             }
             numeric_metrics.update(
                 {
@@ -232,9 +228,8 @@ def run_evaluation() -> None:
                         f"Rule violations: "
                         f"{sum(rule['violations'] for rule in result['rule_results'].values())}",
                         f"Training exact-copy rate: {similarity['training_exact_copy_rate']:.4f}",
-                        f"Training / generation seconds: "
-                        f"{result['operational']['training_seconds']:.2f} / "
-                        f"{result['operational']['generation_seconds']:.2f}",
+                        f"Sampling acceptance rate: "
+                        f"{result['operational']['sampling_acceptance_rate']:.4f}",
                     ]
                 )
             )

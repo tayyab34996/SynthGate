@@ -194,6 +194,34 @@ def _load_synthesizer(model_path: Path) -> SynthesizerProtocol:
         return pickle.load(stream)
 
 
+# This function adds only stable generation metadata to DVC-tracked reports.
+def _build_scenario_report(
+    sampling_report: dict[str, object],
+    model_type: str,
+    contract: ScenarioContract,
+    seed: int,
+    source_hash: str,
+) -> dict[str, object]:
+    return {
+        "status": sampling_report["status"],
+        "reason": sampling_report["reason"],
+        "requested_rows": sampling_report["requested_rows"],
+        "generated_rows": sampling_report["generated_rows"],
+        "target_delay_proportion": sampling_report["target_delay_proportion"],
+        "achieved_delay_proportion": sampling_report["achieved_delay_proportion"],
+        "scenario_target_error": sampling_report["scenario_target_error"],
+        "attempts_by_class": sampling_report["attempts_by_class"],
+        "attempted_rows": sampling_report["attempted_rows"],
+        "accepted_rows": sampling_report["accepted_rows"],
+        "acceptance_rate": sampling_report["acceptance_rate"],
+        "model_type": model_type,
+        "contract": contract.name,
+        "contract_sha256": contract.sha256,
+        "seed": seed,
+        "source_sha256": source_hash,
+    }
+
+
 # This function trains one generator, logs each run remotely, and writes DVC outputs.
 def run_generation(model_type: str, config_path: Path = Path("configs/models.yaml")) -> None:
     import mlflow
@@ -216,7 +244,7 @@ def run_generation(model_type: str, config_path: Path = Path("configs/models.yam
     model_path.parent.mkdir(parents=True, exist_ok=True)
     source_hash = str(json.loads(Path("data/processed/profile.json").read_text())["source_sha256"])
 
-    with mlflow.start_run(run_name=f"{model_type}_training") as training_run:
+    with mlflow.start_run(run_name=f"{model_type}_training"):
         mlflow.log_params(
             {
                 "model_type": model_type,
@@ -250,32 +278,28 @@ def run_generation(model_type: str, config_path: Path = Path("configs/models.yam
 
     output_dir = Path("data/generated") / model_type
     output_dir.mkdir(parents=True, exist_ok=True)
-    run_ids: dict[str, object] = {
-        "training": training_run.info.run_id,
-        "training_seconds": training_seconds,
-        "scenarios": {},
-    }
     for contract_path in sorted(CONTRACT_DIRECTORY.glob("*.yaml")):
         contract = load_contract(contract_path)
         scenario_synthesizer = _load_synthesizer(model_path)
         set_random_seed(seed)
         scenario_synthesizer._set_random_state(seed)
         generation_started = time.perf_counter()
-        generated, report = generate_scenario(scenario_synthesizer, contract, table_name)
-        report["model_type"] = model_type
-        report["contract"] = contract.name
-        report["contract_sha256"] = contract.sha256
-        report["seed"] = seed
-        report["source_sha256"] = source_hash
-        report["training_seconds"] = training_seconds
-        report["generation_seconds"] = time.perf_counter() - generation_started
+        generated, sampling_report = generate_scenario(scenario_synthesizer, contract, table_name)
+        generation_seconds = time.perf_counter() - generation_started
+        report = _build_scenario_report(
+            sampling_report,
+            model_type,
+            contract,
+            seed,
+            source_hash,
+        )
 
         dataset_path = output_dir / f"{contract.name}.csv"
         report_path = output_dir / f"{contract.name}.json"
         generated.to_csv(dataset_path, index=False)
         report_path.write_text(json.dumps(report, indent=2), encoding="utf-8")
 
-        with mlflow.start_run(run_name=f"{model_type}_{contract.name}") as scenario_run:
+        with mlflow.start_run(run_name=f"{model_type}_{contract.name}"):
             mlflow.log_params(
                 {
                     "model_type": model_type,
@@ -288,22 +312,21 @@ def run_generation(model_type: str, config_path: Path = Path("configs/models.yam
             )
             mlflow.log_metrics(
                 {
-                    "generated_rows": float(report["generated_rows"]),
-                    "achieved_delay_proportion": float(report["achieved_delay_proportion"]),
-                    "scenario_target_error": float(report["scenario_target_error"]),
-                    "generation_seconds": float(report["generation_seconds"]),
-                    "training_seconds": float(report["training_seconds"]),
-                    "acceptance_rate": float(report["acceptance_rate"]),
-                    "attempted_rows": float(report["attempted_rows"]),
+                    "generated_rows": float(sampling_report["generated_rows"]),
+                    "achieved_delay_proportion": float(
+                        sampling_report["achieved_delay_proportion"]
+                    ),
+                    "scenario_target_error": float(sampling_report["scenario_target_error"]),
+                    "generation_seconds": generation_seconds,
+                    "training_seconds": training_seconds,
+                    "acceptance_rate": float(sampling_report["acceptance_rate"]),
+                    "attempted_rows": float(sampling_report["attempted_rows"]),
                 }
             )
             mlflow.log_artifact(str(dataset_path), artifact_path="generated")
             mlflow.log_artifact(str(report_path), artifact_path="reports")
-            run_ids["scenarios"][contract.name] = scenario_run.info.run_id
-            if report["status"] != "success":
-                raise RuntimeError(str(report["reason"]))
-
-    (output_dir / "runs.json").write_text(json.dumps(run_ids, indent=2), encoding="utf-8")
+            if sampling_report["status"] != "success":
+                raise RuntimeError(str(sampling_report["reason"]))
 
 
 # This command-line entry point runs the configured baseline or main generator.

@@ -96,3 +96,28 @@ def test_independent_column_shuffles_reduce_stability_score() -> None:
         shuffled_result["stability"]["stability_score"]
         < real_result["stability"]["stability_score"]
     )
+
+
+# This test keeps variable run timings out of DVC-tracked evaluation reports.
+def test_evaluation_report_ignores_run_specific_timings() -> None:
+    frame = _build_frame()
+    contract = replace(
+        load_contract(Path("configs/contracts/normal_operations.yaml")),
+        target_delay_proportion=0.5,
+    )
+    sampling = {
+        "model_type": "gaussian_copula",
+        "source_sha256": "source-hash",
+        "attempted_rows": len(frame),
+        "acceptance_rate": 1.0,
+    }
+
+    first = evaluate_candidate(frame, frame, frame.copy(), contract, sampling)
+    sampling["training_seconds"] = 100.0
+    sampling["generation_seconds"] = 50.0
+    sampling["run_id"] = "different-run-id"
+    second = evaluate_candidate(frame, frame, frame.copy(), contract, sampling)
+
+    assert first == second
+    assert "training_seconds" not in first["operational"]
+    assert "generation_seconds" not in first["operational"]
