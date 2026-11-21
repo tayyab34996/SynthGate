@@ -52,3 +52,34 @@ def test_release_gates_approve_valid_candidate() -> None:
 
     assert decision["decision"] == "APPROVED"
     assert decision["failure_reasons"] == []
+
+
+def test_release_gates_reject_scenario_and_similarity_defects() -> None:
+    evaluation = _evaluation()
+    evaluation["scenario_target_error"] = 0.5
+    evaluation["similarity_risk_indicators"] = {"training_exact_copy_rate": 0.5}
+
+    decision = release_decision(evaluate_release_gates(_frame(), evaluation))
+
+    assert decision["decision"] == "REJECTED"
+    assert any("target error" in reason for reason in decision["failure_reasons"])
+    assert any("exact-copy" in reason for reason in decision["failure_reasons"])
+
+
+def test_release_gates_reject_missing_schema_column() -> None:
+    decision = release_decision(
+        evaluate_release_gates(_frame().drop(columns=["quantity"]), _evaluation())
+    )
+
+    assert decision["decision"] == "REJECTED"
+    assert any("Schema" in reason for reason in decision["failure_reasons"])
+
+
+def test_release_gate_rejects_unsuccessful_sampling() -> None:
+    evaluation = _evaluation()
+    evaluation["sampling_status"] = "unsuccessful"
+
+    decision = release_decision(evaluate_release_gates(_frame(), evaluation))
+
+    assert decision["decision"] == "REJECTED"
+    assert any("Sampling" in reason for reason in decision["failure_reasons"])
