@@ -33,8 +33,7 @@ else:
                 "target_error": report["scenario_target_error"],
                 "stability": report["stability"]["stability_score"],
                 "rule_violations": sum(
-                    int(value["violations"])
-                    for value in report["rule_results"].values()
+                    int(value["violations"]) for value in report["rule_results"].values()
                 ),
             }
         )
