@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+import sys
 from urllib.parse import urlparse
 
 
@@ -11,6 +12,8 @@ def configure_tracking() -> str:
     from dotenv import load_dotenv
 
     load_dotenv()
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8")
     required = ("MLFLOW_TRACKING_URI", "MLFLOW_TRACKING_USERNAME", "MLFLOW_TRACKING_PASSWORD")
     missing = [name for name in required if not os.getenv(name)]
     if missing:
