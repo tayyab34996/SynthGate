@@ -1,0 +1,1 @@
+"""SynthGate API package."""

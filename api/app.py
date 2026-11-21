@@ -4,11 +4,10 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import pandas as pd
 from fastapi import FastAPI, UploadFile
 
 from synthgate.data import deidentify_source, validate_shipments
-
-import pandas as pd
 
 app = FastAPI(title="SynthGate", version="0.1.0")
 
