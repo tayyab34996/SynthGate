@@ -13,16 +13,16 @@ stages:
       size: 9688752
     - path: pyproject.toml
       hash: md5
-      md5: 23cc1f2024ffc2ec48c876b4b813ee97
-      size: 893
+      md5: c5812404c1036ca3b663cc9db64b7282
+      size: 988
     - path: src/synthgate/data.py
       hash: md5
       md5: c546d6e17faa518441321ea4b4655abb
       size: 8013
     - path: uv.lock
       hash: md5
-      md5: 4db12d2991164d6da7731c8e03790417
-      size: 1001667
+      md5: f758a55d7db6bd9628088c9091180a2d
+      size: 1260166
     outs:
     - path: data/processed/holdout.csv
       hash: md5
@@ -65,8 +65,8 @@ stages:
       size: 2582243
     - path: pyproject.toml
       hash: md5
-      md5: 23cc1f2024ffc2ec48c876b4b813ee97
-      size: 893
+      md5: c5812404c1036ca3b663cc9db64b7282
+      size: 988
     - path: src/synthgate/contracts.py
       hash: md5
       md5: dd79c1e33dda844a5ce78b1dd6d4148e
@@ -81,12 +81,12 @@ stages:
       size: 14234
     - path: src/synthgate/tracking.py
       hash: md5
-      md5: b244e539a47025dc1f2847a7e9c78359
-      size: 1497
+      md5: 6a2a2b4a2744d943364734c34951f193
+      size: 1603
     - path: uv.lock
       hash: md5
-      md5: 4db12d2991164d6da7731c8e03790417
-      size: 1001667
+      md5: f758a55d7db6bd9628088c9091180a2d
+      size: 1260166
     outs:
     - path: data/generated/gaussian_copula
       hash: md5
@@ -95,8 +95,8 @@ stages:
       nfiles: 4
     - path: models/gaussian_copula.pkl
       hash: md5
-      md5: 42c6bb5a39835cdf62c84fd99a898039
-      size: 274245
+      md5: 2aae5e6240f4975b18b11d5e287534e9
+      size: 274273
     - path: models/gaussian_copula_metadata.json
       hash: md5
       md5: 3b758f5e7c1846c809148824221f5a16
@@ -126,8 +126,8 @@ stages:
       size: 2582243
     - path: pyproject.toml
       hash: md5
-      md5: 23cc1f2024ffc2ec48c876b4b813ee97
-      size: 893
+      md5: c5812404c1036ca3b663cc9db64b7282
+      size: 988
     - path: src/synthgate/contracts.py
       hash: md5
       md5: dd79c1e33dda844a5ce78b1dd6d4148e
@@ -142,12 +142,12 @@ stages:
       size: 14234
     - path: src/synthgate/tracking.py
       hash: md5
-      md5: b244e539a47025dc1f2847a7e9c78359
-      size: 1497
+      md5: 6a2a2b4a2744d943364734c34951f193
+      size: 1603
     - path: uv.lock
       hash: md5
-      md5: 4db12d2991164d6da7731c8e03790417
-      size: 1001667
+      md5: f758a55d7db6bd9628088c9091180a2d
+      size: 1260166
     outs:
     - path: data/generated/ctgan
       hash: md5
@@ -156,8 +156,8 @@ stages:
       nfiles: 4
     - path: models/ctgan.pkl
       hash: md5
-      md5: 98a007f058000ee33b7fbe3cc83135e4
-      size: 2618823
+      md5: c4aa472cba9408a98a95a9d6aa942939
+      size: 2618775
     - path: models/ctgan_metadata.json
       hash: md5
       md5: 3b758f5e7c1846c809148824221f5a16
@@ -219,8 +219,8 @@ stages:
       size: 2582243
     - path: pyproject.toml
       hash: md5
-      md5: 23cc1f2024ffc2ec48c876b4b813ee97
-      size: 893
+      md5: c5812404c1036ca3b663cc9db64b7282
+      size: 988
     - path: src/synthgate/contracts.py
       hash: md5
       md5: dd79c1e33dda844a5ce78b1dd6d4148e
@@ -235,12 +235,12 @@ stages:
       size: 10970
     - path: src/synthgate/tracking.py
       hash: md5
-      md5: b244e539a47025dc1f2847a7e9c78359
-      size: 1497
+      md5: 6a2a2b4a2744d943364734c34951f193
+      size: 1603
     - path: uv.lock
       hash: md5
-      md5: 4db12d2991164d6da7731c8e03790417
-      size: 1001667
+      md5: f758a55d7db6bd9628088c9091180a2d
+      size: 1260166
     outs:
     - path: artifacts/evaluation
       hash: md5
