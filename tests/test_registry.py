@@ -1,5 +1,9 @@
-from synthgate.registry import ComparisonResult, promote_candidate, rollback_model
-from synthgate.registry import compare_candidate
+from synthgate.registry import (
+    ComparisonResult,
+    compare_candidate,
+    promote_candidate,
+    rollback_model,
+)
 
 
 def _evaluation(stability: float, scenario_error: float, copy_rate: float) -> dict[str, object]:
