@@ -103,3 +103,22 @@ def evaluate_release_gates(
         else "Sampling was unsuccessful and cannot be released.",
     )
     return [schema, rules_gate, scenario, stability_gate, similarity_gate, operational]
+
+
+def release_decision(gates: list[GateResult]) -> dict[str, object]:
+    """This function combines gate results into APPROVED or REJECTED."""
+    failures = [gate.reason for gate in gates if not gate.passed]
+    return {
+        "decision": "APPROVED" if not failures else "REJECTED",
+        "gate_results": [
+            {
+                "name": gate.name,
+                "passed": gate.passed,
+                "measured": gate.measured,
+                "threshold": gate.threshold,
+                "reason": gate.reason,
+            }
+            for gate in gates
+        ],
+        "failure_reasons": failures,
+    }
