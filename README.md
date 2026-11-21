@@ -65,6 +65,32 @@ Evaluation reports contain scenario-target error, per-rule violations, SDMetrics
 
 Run `uv run dvc push` to upload DVC-managed outputs to the configured DagsHub remote and `uv run dvc pull` after cloning to restore them. DVC cannot reproduce the data preparation stage if the source CSV has not been downloaded locally. `uv.lock` records the resolved dependency versions; use `uv sync --locked` to reproduce them.
 
+## Release gates
+
+The release engine evaluates schema validity, mandatory rules, scenario target error, stable properties, similarity risk, and sampling success. An approved candidate receives a manifest under `artifacts/releases/`. A rejected candidate keeps its gate failures as an explanation.
+
+## API and dashboard
+
+Start the FastAPI interface:
+
+```powershell
+uv run uvicorn api.app:app --host 0.0.0.0 --port 8000
+```
+
+Start the Streamlit dashboard:
+
+```powershell
+uv run streamlit run dashboard/app.py
+```
+
+## Docker
+
+Build and start the local stack:
+
+```powershell
+docker compose -f docker/compose.yaml up --build
+```
+
 ## Development
 
 ```powershell
