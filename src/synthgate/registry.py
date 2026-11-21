@@ -59,3 +59,38 @@ def compare_candidate(
         candidate_stability,
         approved_stability,
     )
+
+
+def promote_candidate(
+    client: object,
+    model_name: str,
+    candidate_version: str,
+    comparison: ComparisonResult,
+) -> dict[str, object]:
+    """This function promotes only candidates that pass release comparison."""
+    if not comparison.passed:
+        raise RuntimeError(comparison.reason)
+    client.set_registered_model_alias(model_name, "approved", str(candidate_version))
+    return {
+        "model_name": model_name,
+        "approved_version": str(candidate_version),
+        "alias": "approved",
+        "decision": "PROMOTED",
+        "reason": comparison.reason,
+    }
+
+
+def rollback_model(
+    client: object,
+    model_name: str,
+    previous_version: str,
+) -> dict[str, object]:
+    """This function repoints the approved alias to a previous version."""
+    client.set_registered_model_alias(model_name, "approved", str(previous_version))
+    return {
+        "model_name": model_name,
+        "approved_version": str(previous_version),
+        "alias": "approved",
+        "decision": "ROLLED_BACK",
+        "reason": "Approved alias restored to the previous model version.",
+    }
