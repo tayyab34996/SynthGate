@@ -71,7 +71,7 @@ def test_collapsed_stability_is_detected() -> None:
     decision = release_decision(evaluate_release_gates(_frame(), evaluation))
 
     assert decision["decision"] == "REJECTED"
-    assert "stability" in " ".join(decision["failure_reasons"])
+    assert "Stable properties" in " ".join(decision["failure_reasons"])
 
 
 def test_copied_rows_are_detected_by_similarity_gate() -> None:
