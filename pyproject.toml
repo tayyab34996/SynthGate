@@ -21,6 +21,10 @@ dependencies = [
     "sdmetrics>=0.33",
     "sdv>=2.2,<3",
     "torch>=2.0",
+    "fastapi>=0.115",
+    "uvicorn>=0.30",
+    "prefect>=3.1",
+    "streamlit>=1.40",
 ]
 
 [project.optional-dependencies]
